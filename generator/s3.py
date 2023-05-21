@@ -1,17 +1,34 @@
 import logging
+import os
 
 import boto3
 from botocore.exceptions import ClientError
 
 
 class S3Instance:
-    def __init__(self, use_localstack=False, bucket_name="certificate-templates"):
+    def __init__(self, bucket_name="certificate-templates"):
         self.kwargs = {}
-        if use_localstack:
-            self.kwargs["endpoint_url"] = "http://0.0.0.0:4566"
+        if bool(int(os.environ.get("USE_LOCALSTACK", "0"))):
+            self.kwargs["endpoint_url"] = os.environ["LOCALSTACK_ENDPOINT"]
 
         self.client = boto3.client("s3", **self.kwargs)
         self.bucket_name = bucket_name
+
+        self.create_bucket()
+
+    def create_bucket(self):
+        # Check if the bucket exists
+        response = self.client.list_buckets()
+
+        for bucket in response['Buckets']:
+            if bucket['Name'] == self.bucket_name:
+                print(f"Bucket '{self.bucket_name}' already exists.")
+                break
+        else:
+            # Create the bucket
+            self.client.create_bucket(Bucket=self.bucket_name)
+            print(f"Bucket '{self.bucket_name}' created successfully.")
+        
 
     def upload_file(self, file, object_name=None):
         if object_name is None:

@@ -10,6 +10,7 @@ from s3 import S3Instance
 from utils import convert_html_to_pdf, get_html_content
 
 app = Flask(__name__)
+s3_obj = S3Instance()
 
 
 @app.context_processor
@@ -47,7 +48,6 @@ def generate_certificates():
 
     with open(f"templates/{template_name}", "wb") as f:
         ok = s3_obj.download_file(template_name, f)
-        f.close()
         if not ok:
             return jsonify({"Fail to load template"}), 500
 
@@ -89,15 +89,8 @@ def upload_to_bucket():
     prefix = "templates" if upload_type == "templates" else "static"
     object_name = prefix + "/" + file.filename
 
-    s3_obj = S3Instance(use_localstack=True)
 
     if s3_obj.upload_file(file, object_name):
         return jsonify({"message": "FIle uploaded successfully"}), 200
     else:
         return jsonify({"message": "Failed to upload file"}), 500
-
-
-if __name__ == "__main__":
-    s3_obj = S3Instance(use_localstack=True)
-
-    app.run(debug=True)

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generator
+  labels:
+    app: generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generator
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: generator
+    spec:
+      containers:
+        - name: generator
+          image: rekib0023/certificate-generator-generator:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: generator-configmap
+            - secretRef:
+                name: generator-secret
+          

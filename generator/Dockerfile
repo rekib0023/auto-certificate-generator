@@ -15,3 +15,5 @@ COPY . .
 EXPOSE 5000
 
 ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
+
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000"]
