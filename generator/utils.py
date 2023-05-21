@@ -1,7 +1,16 @@
 import hashlib
+import io
+import os
+import zipfile
 from datetime import datetime
 
+import pandas as pd
 import pdfkit
+from flask import render_template
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def convert_html_to_pdf(html):
@@ -36,3 +45,32 @@ def get_html_content(data):
     )
 
     return html_context
+
+
+def prepare_certificate_zip(file_name, s3_obj, template_name, campaign_name):
+    logger.info("Preparing certificates")
+    df = pd.read_excel(f"sheets/{file_name}")
+
+    pdf_data = {}
+    for row in df.itertuples():
+        html_content = get_html_content(row)
+        html = render_template(template_name, **html_content)
+        pdf = convert_html_to_pdf(html)
+        pdf_data[row.first_name + "_" + row.last_name] = pdf
+        object_name = f'certificates/{campaign_name}/{row.first_name + "_" + row.last_name}_certificate.pdf'
+        in_memory_file = io.BytesIO(pdf)
+        s3_obj.upload_file(in_memory_file, object_name)
+        in_memory_file.close()
+
+    os.remove(f"templates/{template_name}")
+    os.remove(f"sheets/{file_name}")
+
+    logger.info("Preparing zip")
+    zip_data = io.BytesIO()
+    with zipfile.ZipFile(zip_data, mode="w") as zip_file:
+        for k, pdf in pdf_data.items():
+            zip_file.writestr(f"{k}_certificate.pdf", pdf)
+
+    object_name = f"{campaign_name}/certificates"
+    if not s3_obj.upload_file(zip_data, object_name):
+        logger.error("Failed")

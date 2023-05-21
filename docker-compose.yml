@@ -1,0 +1,42 @@
+version: "3.7"
+services:
+
+  generator_app:
+    build: './generator'
+    env_file:
+      - './generator/.env'
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbit
+      - localstack
+
+  rabbit:
+    hostname: rabbit
+    image: "rabbitmq:3-management"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  worker:
+    build: './worker'
+    user: nobody
+    depends_on:
+      - rabbit
+      - generator_app
+
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
