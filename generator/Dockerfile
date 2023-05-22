@@ -1,9 +1,9 @@
 FROM python:3.10-slim-buster
 
-RUN apt-get update && \
-    apt-get install -y wkhtmltopdf && \
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y build-essential
+RUN apt-get install -y wkhtmltopdf python3-dev default-libmysqlclient-dev && \
     rm -rf /var/lib/apt/lists/*
-
 
 WORKDIR /app
 COPY requirements.txt .
@@ -16,4 +16,8 @@ EXPOSE 5000
 
 ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
 
-CMD flask run --host=0.0.0.0 --debug
+# Make the script executable
+RUN chmod +x init.sh
+
+# Start the application
+CMD ["./init.sh"]

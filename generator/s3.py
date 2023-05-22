@@ -28,7 +28,6 @@ class S3Instance:
         self.create_bucket()
 
     def create_bucket(self):
-        # Check if the bucket exists
         response = self.client.list_buckets()
 
         for bucket in response["Buckets"]:
@@ -36,7 +35,6 @@ class S3Instance:
                 print(f"Bucket '{self.bucket_name}' already exists.")
                 break
         else:
-            # Create the bucket
             self.client.create_bucket(Bucket=self.bucket_name)
             print(f"Bucket '{self.bucket_name}' created successfully.")
 
@@ -46,11 +44,16 @@ class S3Instance:
 
         try:
             self.client.upload_fileobj(file, self.bucket_name, object_name)
+            url = self.client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self.bucket_name, "Key": object_name},
+                ExpiresIn=3600,
+            )
+            logger.info("Uploaded successfully")
+            return url
         except ClientError as e:
             logger.error(e)
-            return False
-        logger.info("Uploaded successfully")
-        return True
+            return None
 
     def download_file(self, filepath, file_obj):
         try:
