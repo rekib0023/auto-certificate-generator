@@ -1,7 +1,7 @@
 version: "3.7"
 services:
 
-  generator-app:
+  generator-srv:
     build: './generator'
     env_file:
       - './generator/.env'
@@ -11,6 +11,13 @@ services:
       - rabbit
       - localstack
       - generator-db
+  
+  event-bus-srv:
+    build: './event-bus'
+    ports:
+      -"5005:5005"
+    depends_on:
+      - generator-srv
 
   rabbit:
     hostname: rabbit
@@ -22,8 +29,8 @@ services:
       - "15672:15672"
       - "5672:5672"
 
-  worker:
-    build: './worker'
+  queue:
+    build: './queue'
     user: nobody
     depends_on:
       - rabbit
@@ -41,6 +48,7 @@ services:
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+      
   generator-db:
     image: mysql:latest
     container_name: generator-db

@@ -9,7 +9,7 @@ logger = get_task_logger(__name__)
 app = Celery("tasks", broker="amqp://admin:mypass@rabbit:5672", backend="rpc://")
 
 
-GENERATOR_ENDPOINT = "http://generator_app:5000"
+GENERATOR_ENDPOINT = "http://generator-srv:5000"
 
 
 @app.task()

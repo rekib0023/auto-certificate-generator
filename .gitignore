@@ -266,3 +266,5 @@ pyrightconfig.json
 volume
 
 mysql-data
+
+node_modules
