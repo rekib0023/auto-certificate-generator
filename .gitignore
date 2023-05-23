@@ -263,8 +263,6 @@ pyrightconfig.json
 
 .idea
 
-volume
-
-mysql-data
-
 node_modules
+
+volumes/

@@ -20,4 +20,4 @@ ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
 RUN chmod +x init.sh
 
 # Start the application
-CMD ["./init.sh"]
+CMD ["docker-entrypoint.sh"]
