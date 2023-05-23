@@ -8,24 +8,9 @@ from datetime import datetime
 import pandas as pd
 import pdfkit
 from flask import render_template
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
+from db import Session
 from models import CertificateModel
-
-DB_HOST = os.environ["DB_HOST"]
-DB_PORT = os.environ["DB_PORT"]
-DB_DATABASE = os.environ["MYSQL_DATABASE"]
-DB_PASSWORD = os.environ["MYSQL_ROOT_PASSWORD"]
-DB_USER = os.environ["MYSQL_USER"]
-
-
-SQLALCHEMY_URI = f"mysql+mysqlconnector://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}?charset=utf8"
-
-engine = create_engine(SQLALCHEMY_URI)
-
-Session = sessionmaker(bind=engine)
-
 
 logger = logging.getLogger(__name__)
 

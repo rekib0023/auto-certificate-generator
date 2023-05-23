@@ -17,7 +17,7 @@ EXPOSE 5000
 ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
 
 # Make the script executable
-RUN chmod +x init.sh
+RUN chmod +x docker-entrypoint.sh
 
 # Start the application
-CMD ["docker-entrypoint.sh"]
+CMD ["./docker-entrypoint.sh"]
