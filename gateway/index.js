@@ -42,10 +42,12 @@ app.post("/api/create-campaign", upload.single("file"), async (req, res) => {
 
   const event = {
     type: "CAMPAIGN_CREATED",
-    template_key,
-    campaign_name,
-    file_url,
-    campaign_id,
+    data: {
+      template_key,
+      campaign_name,
+      file_url,
+      campaign_id,
+    },
   };
 
   await axios.post("http://event-bus-srv:5005/events", event).catch((err) => {

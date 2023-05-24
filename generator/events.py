@@ -38,8 +38,11 @@ def generate_certificates(payload):
         session.add(certificate)
         session.commit()
     logger.info("Generating certificates")
-    payload["type"] = "PREPARE_CERTIFICATES"
-    r = celery.send_task("tasks.generate_certificates", kwargs={"payload": payload})
+    event = {
+        "type": "PREPARE_CERTIFICATES",
+        "data": payload
+    }
+    r = celery.send_task("tasks.generate_certificates", kwargs={"event": event})
     logger.info(r.backend)
 
 

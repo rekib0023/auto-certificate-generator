@@ -37,13 +37,14 @@ def utility_processor():
 
 @app.route("/events", methods=["POST"])
 def events():
-    event = request.json
-    logger.info(event)
-    event_type = event.pop("type")
+    content = request.get_json()
+    event_type = content["type"]
+    logger.info("Received event: ", event_type)
+    data = content["data"]
 
     match event_type:
         case "CAMPAIGN_CREATED":
-            generate_certificates(event)
+            generate_certificates(data)
         case "PREPARE_CERTIFICATES":
-            prepare_certificates(event)
+            prepare_certificates(data)
     return {"status": "OK"}
