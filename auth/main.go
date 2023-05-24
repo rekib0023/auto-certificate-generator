@@ -1,11 +1,13 @@
 package main
 
 import (
+	"time"
+
+	"github.com/rekib0023/auth/controllers"
 	"github.com/rekib0023/auth/database"
 	"github.com/rekib0023/auth/helpers"
 	"github.com/rekib0023/auth/middleware"
 	"github.com/rekib0023/auth/routes"
-	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -29,6 +31,7 @@ func main() {
 	router.Use(gin.Logger())
 	routes.AuthRoutes(router)
 	router.Use(middleware.AuthMiddleware())
+	router.POST("/events", controllers.Events())
 
 	routes.UserRoutes(router)
 
