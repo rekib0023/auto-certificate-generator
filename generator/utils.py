@@ -1,15 +1,10 @@
 import hashlib
 import io
 import logging
-import os
-import zipfile
-from datetime import datetime
-
-import pandas as pd
 import pdfkit
-from db import Session
-from flask import render_template
-from models import CertificateModel
+import zipfile
+
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -46,41 +41,6 @@ def get_html_content(data, campaign_name):
     )
 
     return html_context
-
-
-def prepare_certificates(file_url, s3_obj, template_key, campaign_name):
-    logger.info("Preparing certificates")
-    df = pd.read_excel(file_url)
-
-    pdf_data = {}
-    for row in df.itertuples():
-        html_content = get_html_content(row, campaign_name)
-        html = render_template(template_key, **html_content)
-        pdf = convert_html_to_pdf(html)
-        in_memory_file = io.BytesIO(pdf)
-        object_name = f'certificates/{campaign_name}/{row.first_name + "_" + row.last_name}_certificate.pdf'
-        if s3_obj.upload_file(in_memory_file, object_name):
-            pdf_data[row.first_name + "_" + row.last_name] = pdf
-            status = "Success"
-            s3_path = object_name
-        else:
-            status = "Failed"
-            s3_path = ""
-        session = Session()
-        certificate = (
-            session.query(CertificateModel)
-            .filter_by(certificate_number=html_content["certificate_number"])
-            .first()
-        )
-
-        if certificate:
-            certificate.status = status
-            certificate.s3_path = s3_path
-            session.commit()
-
-        in_memory_file.close()
-
-    os.remove(f"templates/{template_key}")
 
 
 def zip_certificates(pdf_data, s3_obj, campaign_name):

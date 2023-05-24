@@ -1,14 +1,14 @@
 import base64
 import logging
 
-from db import SQLALCHEMY_URI
 from dotenv import load_dotenv
-from events import prepare_certificates
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_migrate import Migrate
+
+from db import SQLALCHEMY_URI
+from events import generate_certificates, prepare_certificates
 from models import CertificateModel, db
 from s3 import S3Instance
-from tasks import task_route
 
 load_dotenv(".env")
 
@@ -16,7 +16,6 @@ app = Flask(__name__)
 
 app.logger.setLevel(logging.DEBUG)
 
-app.register_blueprint(task_route)
 logger = app.logger
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_URI
@@ -38,13 +37,13 @@ def utility_processor():
 
 @app.route("/events", methods=["POST"])
 def events():
-    data = request.json
-    logger.info(data)
-    event_type = data.pop("type")
+    event = request.json
+    logger.info(event)
+    event_type = event.pop("type")
 
     match event_type:
         case "CAMPAIGN_CREATED":
-            prepare_certificates(data)
-        case "CERTIFICATE_GENERATED":
-            pass
+            generate_certificates(event)
+        case "PREPARE_CERTIFICATES":
+            prepare_certificates(event)
     return {"status": "OK"}
