@@ -1,12 +1,16 @@
 import base64
 import logging
 
+from db import SQLALCHEMY_URI
+from dotenv import load_dotenv
+from events import prepare_certificates
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
-
-from events import prepare_certificates
+from models import CertificateModel, db
 from s3 import S3Instance
 from tasks import task_route
+
+load_dotenv(".env")
 
 app = Flask(__name__)
 
@@ -15,14 +19,8 @@ app.logger.setLevel(logging.DEBUG)
 app.register_blueprint(task_route)
 logger = app.logger
 
-from db import init_db
-
-db = init_db(app)
-
-
-with app.app_context():
-    db.create_all()
-
+app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_URI
+db.init_app(app)
 migrate = Migrate(app, db)
 
 
@@ -38,33 +36,15 @@ def utility_processor():
     return dict(get_image_file_as_base64_data=get_image_file_as_base64_data)
 
 
-@app.route("/api/upload-to-bucket", methods=["POST"])
-def upload_to_bucket():
-    if "file" not in request.files:
-        return "No file uploaded", 400
-
-    file = request.files["file"]
-
-    upload_type = request.form.get("type")
-
-    prefix = "templates" if upload_type == "templates" else "static"
-    object_name = prefix + "/" + file.filename
-
-    s3_obj = S3Instance()
-
-    if s3_obj.upload_file(file, object_name):
-        return jsonify({"message": "FIle uploaded successfully"}), 200
-    else:
-        return jsonify({"message": "Failed to upload file"}), 500
-
-
 @app.route("/events", methods=["POST"])
 def events():
-    data = request.form
-    event_type = data["type"]
+    data = request.json
+    logger.info(data)
+    event_type = data.pop("type")
 
     match event_type:
         case "CAMPAIGN_CREATED":
-            prepare_certificates(request)
+            prepare_certificates(data)
         case "CERTIFICATE_GENERATED":
             pass
+    return {"status": "OK"}

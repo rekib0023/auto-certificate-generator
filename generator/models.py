@@ -12,6 +12,7 @@ class CertificateModel(db.Model):
     status = db.Column(db.String(120), nullable=True, default="Pending")
     s3_path = db.Column(db.String(256), nullable=True, default="")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    campaign_id = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f"<Certificate {self.certificate_number}>"

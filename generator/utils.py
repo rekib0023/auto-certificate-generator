@@ -7,9 +7,8 @@ from datetime import datetime
 
 import pandas as pd
 import pdfkit
-from flask import render_template
-
 from db import Session
+from flask import render_template
 from models import CertificateModel
 
 logger = logging.getLogger(__name__)
@@ -49,14 +48,14 @@ def get_html_content(data, campaign_name):
     return html_context
 
 
-def prepare_certificates(file_url, s3_obj, template_name, campaign_name):
+def prepare_certificates(file_url, s3_obj, template_key, campaign_name):
     logger.info("Preparing certificates")
     df = pd.read_excel(file_url)
 
     pdf_data = {}
     for row in df.itertuples():
         html_content = get_html_content(row, campaign_name)
-        html = render_template(template_name, **html_content)
+        html = render_template(template_key, **html_content)
         pdf = convert_html_to_pdf(html)
         in_memory_file = io.BytesIO(pdf)
         object_name = f'certificates/{campaign_name}/{row.first_name + "_" + row.last_name}_certificate.pdf'
@@ -81,7 +80,7 @@ def prepare_certificates(file_url, s3_obj, template_name, campaign_name):
 
         in_memory_file.close()
 
-    os.remove(f"templates/{template_name}")
+    os.remove(f"templates/{template_key}")
 
 
 def zip_certificates(pdf_data, s3_obj, campaign_name):

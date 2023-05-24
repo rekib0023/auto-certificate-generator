@@ -3,10 +3,7 @@ import logging
 
 import pandas as pd
 from celery import Celery
-from flask import jsonify
-
 from models import CertificateModel
-from s3 import S3Instance
 
 logger = logging.getLogger(__name__)
 from db import Session
@@ -14,25 +11,11 @@ from db import Session
 celery = Celery("worker", broker="amqp://admin:mypass@rabbit:5672", backend="rpc://")
 
 
-def prepare_certificates(request):
-    file = request.files["file"]
-
-    s3_obj = S3Instance()
-    object_name = "sheets" + "/" + file.filename
-
-    url = s3_obj.upload_file(file, object_name)
-
-    if not url:
-        return jsonify({"message": "Internal server error"}), 500
-
+def prepare_certificates(data):
+    url = data["file_url"]
     df = pd.read_excel(url)
 
-    campaign_name = request.form.get("campaign_name", "default")
-    payload = {
-        "file_url": url,
-        "template_name": request.form.get("template_name", "template.html"),
-        "campaign_name": campaign_name,
-    }
+    campaign_name = data["campaign_name"]
     session = Session()
     for row in df.itertuples():
         certificate = CertificateModel(
@@ -44,9 +27,10 @@ def prepare_certificates(request):
                 + "_"
                 + hashlib.shake_256(campaign_name.encode()).hexdigest(4)
             ),
+            campaign_id=data["campaign_id"],
         )
         session.add(certificate)
         session.commit()
     logger.info("Generating certificates")
-    r = celery.send_task("tasks.generate_certificates", kwargs={"request": payload})
+    r = celery.send_task("tasks.generate_certificates", kwargs={"payload": data})
     logger.info(r.backend)

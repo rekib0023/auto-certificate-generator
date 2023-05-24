@@ -8,7 +8,7 @@ DB_HOST = os.environ["DB_HOST"]
 DB_PORT = os.environ["DB_PORT"]
 DB_DATABASE = os.environ["MYSQL_DATABASE"]
 DB_PASSWORD = os.environ["MYSQL_ROOT_PASSWORD"]
-DB_USER = os.environ["MYSQL_USER"]
+DB_USER = os.environ["DB_USER"]
 
 SQLALCHEMY_URI = f"mysql+mysqlconnector://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}?charset=utf8"
 
@@ -19,4 +19,4 @@ Session = sessionmaker(bind=engine)
 
 def init_db(app):
     app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_URI
-    return SQLAlchemy(app)
+    return SQLAlchemy(app), app
