@@ -3,6 +3,7 @@ services:
 
   generator-srv:
     build: './generator'
+    container_name: generator-srv
     env_file:
       - './generator/.env'
     ports:

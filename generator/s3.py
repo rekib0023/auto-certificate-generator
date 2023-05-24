@@ -25,19 +25,6 @@ class S3Instance:
         self.client = boto3.client("s3", **self.kwargs)
         self.bucket_name = bucket_name
 
-        self.create_bucket()
-
-    def create_bucket(self):
-        response = self.client.list_buckets()
-
-        for bucket in response["Buckets"]:
-            if bucket["Name"] == self.bucket_name:
-                print(f"Bucket '{self.bucket_name}' already exists.")
-                break
-        else:
-            self.client.create_bucket(Bucket=self.bucket_name)
-            print(f"Bucket '{self.bucket_name}' created successfully.")
-
     def upload_file(self, file, object_name=None):
         if object_name is None:
             object_name = file.filename

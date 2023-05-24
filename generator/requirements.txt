@@ -1,4 +1,5 @@
 alembic==1.11.1
+awscli
 amqp==5.1.1
 async-timeout==4.0.2
 billiard==3.6.4.0

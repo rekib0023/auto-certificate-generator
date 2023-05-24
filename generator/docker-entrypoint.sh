@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source bootstrap.sh
+
 # Run database migrations
 flask db upgrade
 
