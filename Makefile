@@ -11,4 +11,25 @@ build: build-stack
 deploy-generator-app: 
 	kubectl apply -f ./generator/manifests/
 
-.PHONY: build build-generator deploy-generator-app run-localstack build-stack
+deploy-generator-srv:
+	docker-compose up --build generator-srv
+
+deploy-gateway-srv:
+	docker-compose up --build gateway-srv
+
+deploy-auth-srv:
+	docker-compose up --build auth-srv
+
+deploy-event-bus-srv:
+	docker-compose up --build event-bus-srv
+
+deploy-workers:
+	docker-compose up --build rabbit queue
+
+deploy-localstack:
+	docker-compose up --build localstack
+
+deploy-dbs:
+	docker-compose up --build generator-db auth-psql
+
+.PHONY: build build-generator deploy-generator-app run-localstack build-stack deploy-generator-srv deploy-gateway-srv deploy-auth-srv deploy-event-bus-srv deploy-workers deploy-localstack deploy-dbs
