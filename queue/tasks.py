@@ -13,14 +13,9 @@ GENERATOR_ENDPOINT = "http://generator-srv:5000"
 
 
 @app.task()
-def generate_certificates(request):
+def generate_certificates(payload):
     logger.info("Got Request - Starting work ")
     time.sleep(4)
-    payload = {
-        "file_url": request["file_url"],
-        "template_name": request["template_name"],
-        "campaign_name": request["campaign_name"],
-    }
     response = requests.post(
         f"{GENERATOR_ENDPOINT}/api/generate-certificates", json=payload
     )
