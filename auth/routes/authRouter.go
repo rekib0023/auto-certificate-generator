@@ -10,6 +10,5 @@ func AuthRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/api/signup", controllers.Signup())
 	incomingRoutes.POST("/api/login", controllers.Login())
 	incomingRoutes.GET("/api/refresh-token", controllers.RefreshToken())
-	incomingRoutes.POST("/api/logout", controllers.Logout())
 	incomingRoutes.POST("/api/verify", controllers.Verify())
 }

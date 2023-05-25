@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/rekib0023/auth/database"
 	"github.com/rekib0023/auth/helpers"
@@ -70,9 +69,8 @@ func Signup() gin.HandlerFunc {
 		}
 
 		responseUser := UserResponse(user)
-
-		helpers.SetCookie(c, "jwt", accessToken, time.Now().Add(time.Hour*1))
-		helpers.SetCookie(c, "refresh_token", refreshToken, time.Now().Add(time.Hour*24*7))
+		responseUser.AccessToken = accessToken
+		responseUser.RefreshToken = refreshToken
 
 		c.JSON(http.StatusCreated, responseUser)
 	}
@@ -120,8 +118,8 @@ func Login() gin.HandlerFunc {
 
 		responseUser := UserResponse(user)
 
-		helpers.SetCookie(c, "jwt", accessToken, time.Now().Add(time.Hour*1))
-		helpers.SetCookie(c, "refresh_token", refreshToken, time.Now().Add(time.Hour*24*7))
+		responseUser.AccessToken = accessToken
+		responseUser.RefreshToken = refreshToken
 
 		c.JSON(http.StatusOK, responseUser)
 	}
@@ -150,21 +148,9 @@ func RefreshToken() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate access token"})
 			return
 		}
-		helpers.SetCookie(c, "jwt", accessToken, time.Now().Add(time.Hour*1))
 
-		c.JSON(http.StatusOK, gin.H{"message": "access token refreshed successfully"})
+		c.JSON(http.StatusOK, gin.H{"message": "access token refreshed successfully", "access_token": accessToken})
 
-	}
-}
-
-func Logout() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		helpers.ClearCookie(c, "jwt")
-		helpers.ClearCookie(c, "refresh_token")
-
-		c.JSON(http.StatusOK, gin.H{
-			"message": "User logged out successfully",
-		})
 	}
 }
 

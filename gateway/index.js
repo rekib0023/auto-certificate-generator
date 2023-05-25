@@ -4,12 +4,15 @@ const os = require("os");
 const multer = require("multer");
 const fs = require("fs");
 
+const authRoutes = require("./routes/authRoutes");
 const uploadtoS3 = require("./utils");
 
 const app = express();
 const upload = multer({ dest: os.tmpdir() });
 
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
 
 app.post("/api/create-campaign", upload.single("file"), async (req, res) => {
   if (!req.file) {
