@@ -22,6 +22,7 @@ def generate_certificates(payload):
     df = pd.read_excel(url)
 
     campaign_name = payload["campaign_name"]
+    company_name = payload["company_name"]
     session = Session()
     for row in df.itertuples():
         certificate = CertificateModel(
@@ -32,6 +33,7 @@ def generate_certificates(payload):
                 ).hexdigest(4)
                 + "_"
                 + hashlib.shake_256(campaign_name.encode()).hexdigest(4)
+                + hashlib.shake_256(company_name.encode()).hexdigest(4)
             ),
             campaign_id=payload["campaign_id"],
         )
@@ -51,6 +53,7 @@ def prepare_certificates(payload):
 
     template_key = payload["template_key"]
     campaign_name = payload["campaign_name"]
+    company_name = payload["company_name"]
 
     s3_obj = S3Instance()
 
@@ -62,7 +65,7 @@ def prepare_certificates(payload):
 
     pdf_data = {}
     for row in df.itertuples():
-        html_content = get_html_content(row, campaign_name)
+        html_content = get_html_content(row, campaign_name, company_name)
         html = render_template(template_key, **html_content)
         pdf = convert_html_to_pdf(html)
         in_memory_file = io.BytesIO(pdf)

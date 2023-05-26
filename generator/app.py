@@ -37,10 +37,11 @@ def utility_processor():
 
 @app.route("/events", methods=["POST"])
 def events():
-    content = request.get_json()
-    event_type = content["type"]
-    logger.info("Received event: ", event_type)
-    data = content["data"]
+    event = request.get_json()
+    event_type = event["type"]
+    logger.info("Received event: ", event)
+    data = event["data"]
+    logger.info(data)
 
     match event_type:
         case "CAMPAIGN_CREATED":

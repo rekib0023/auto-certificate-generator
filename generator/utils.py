@@ -25,7 +25,7 @@ def convert_html_to_pdf(html):
     return pdfkit.from_string(html, False, options=options)
 
 
-def get_html_content(data, campaign_name):
+def get_html_content(data, campaign_name, company_name):
     now = datetime.now()
     html_context = {
         "name": data.first_name + " " + data.last_name,
@@ -38,6 +38,8 @@ def get_html_content(data, campaign_name):
         hashlib.shake_256(html_context["name"].encode()).hexdigest(4)
         + "_"
         + hashlib.shake_256(campaign_name.encode()).hexdigest(4)
+        + hashlib.shake_256(company_name.encode()).hexdigest(4)
+        
     )
 
     return html_context

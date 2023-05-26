@@ -30,9 +30,9 @@ func main() {
 	}))
 	router.Use(gin.Logger())
 	routes.AuthRoutes(router)
-	router.Use(middleware.AuthMiddleware())
 	router.POST("/events", controllers.Events())
 
+	router.Use(middleware.AuthMiddleware())
 	routes.UserRoutes(router)
 
 	router.Run(":" + helpers.AppConfig.PORT)

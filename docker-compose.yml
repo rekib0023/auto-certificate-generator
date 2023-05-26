@@ -21,7 +21,7 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      - auth-psql
+      - auth-db
 
   gateway-srv:
     build: './gateway'
@@ -74,13 +74,22 @@ services:
     volumes:
       - ./volumes/mysql-data:/var/lib/mysql
     
-  auth-psql:
+  auth-db:
     image: postgres:15-alpine
-    container_name: auth-psql
+    container_name: auth-db
     ports:
       - "5433:5432"
     env_file:
       - './auth/.env'
     volumes:
-      - ./volumes/auth-psql-data:/var/lib/postgresql/data
-      
+      - ./volumes/auth-db-data:/var/lib/postgresql/data
+  
+  gateway-db:
+    image: postgres:15-alpine
+    container_name: gateway-db
+    ports:
+      - "5434:5432"
+    env_file:
+      - './gateway/.env'
+    volumes:
+      - ./volumes/gateway-db-data:/var/lib/postgresql/data

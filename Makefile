@@ -30,6 +30,12 @@ deploy-localstack:
 	docker-compose up --build localstack
 
 deploy-dbs:
-	docker-compose up --build generator-db auth-psql
+	docker-compose up --build generator-db auth-db gateway-db
 
-.PHONY: build build-generator deploy-generator-app run-localstack build-stack deploy-generator-srv deploy-gateway-srv deploy-auth-srv deploy-event-bus-srv deploy-workers deploy-localstack deploy-dbs
+generator-db-exec:
+	docker exec -it generator-db mysql -u root -p
+
+gateway-db-exec:
+	docker exec -it -u postgres gateway-db psql
+
+.PHONY: build build-generator deploy-generator-app run-localstack build-stack deploy-generator-srv deploy-gateway-srv deploy-auth-srv deploy-event-bus-srv deploy-workers deploy-localstack deploy-dbs generator-db-exec gateway-db-exec

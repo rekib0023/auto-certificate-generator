@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/rekib0023/auth/database"
@@ -156,8 +157,10 @@ func RefreshToken() gin.HandlerFunc {
 
 func Verify() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		jwt_token, err := c.Cookie("jwt")
+		jwt_token, err := c.Cookie("access_token")
+		log.Printf("Log: %s", jwt_token)
 		if err != nil {
+			log.Printf("Error: %s", err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
@@ -168,7 +171,18 @@ func Verify() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "User verified", "user_id": claims.UserID})
+		var user models.User
+
+		database.Database.Db.Where("ID = ?", claims.UserID).First(&user)
+
+		if user.ID == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "No user found with the given ID"})
+			return
+		}
+
+		responseUser := UserResponse(user)
+
+		c.JSON(http.StatusOK, responseUser)
 	}
 }
 
