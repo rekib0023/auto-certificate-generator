@@ -38,12 +38,14 @@ router.post("/create-campaign", upload.single("file"), async (req, res) => {
     template_key = "template.html",
     campaign_name = "default",
     company_name,
+    company_email,
   } = req.body;
 
   try {
     const campaign = await Campaign.create({
       campaign_name,
       company_name,
+      company_email,
       created_by: user.id,
     });
 
@@ -55,6 +57,7 @@ router.post("/create-campaign", upload.single("file"), async (req, res) => {
         file_url,
         campaign_id: campaign.id,
         company_name,
+        company_email,
       },
     };
 

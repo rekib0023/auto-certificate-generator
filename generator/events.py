@@ -1,18 +1,19 @@
 import hashlib
 import io
+import json
 import logging
 import os
+import requests
 
 import pandas as pd
 from celery import Celery
-from flask import render_template
+from flask import render_template, current_app
 
 from db import Session
 from models import CertificateModel
 from s3 import S3Instance
 from utils import convert_html_to_pdf, get_html_content
 
-logger = logging.getLogger(__name__)
 
 celery = Celery("worker", broker="amqp://admin:mypass@rabbit:5672", backend="rpc://")
 
@@ -39,13 +40,13 @@ def generate_certificates(payload):
         )
         session.add(certificate)
         session.commit()
-    logger.info("Generating certificates")
+    current_app.logger.info("Generating certificates")
     event = {
         "type": "PREPARE_CERTIFICATES",
         "data": payload
     }
     r = celery.send_task("tasks.generate_certificates", kwargs={"event": event})
-    logger.info(r.backend)
+    current_app.logger.info(r.backend)
 
 
 def prepare_certificates(payload):
@@ -54,13 +55,14 @@ def prepare_certificates(payload):
     template_key = payload["template_key"]
     campaign_name = payload["campaign_name"]
     company_name = payload["company_name"]
+    company_email = payload["company_email"]
 
     s3_obj = S3Instance()
 
     with open(f"templates/{template_key}", "wb") as f:
         s3_obj.download_file(f"templates/{template_key}", f)
 
-    logger.info("Preparing certificates")
+    current_app.logger.info("Preparing certificates")
     df = pd.read_excel(file_url)
 
     pdf_data = {}
@@ -84,9 +86,39 @@ def prepare_certificates(payload):
             .first()
         )
 
+        if status == "Success":
+            payload = json.dumps({
+                        "sender": f"{company_email}",
+                        "recipients": [
+                            f"{html_content['email']}"
+                        ],
+                        "subject": "Subject",
+                        "body": "Tests",
+                        "attachments": [
+                            {
+                            "key": object_name,
+                            "mime_type": "application",
+                            "subtype": "pdf",
+                            "filename": f'{row.first_name + "_" + row.last_name}_certificate.pdf'
+                            }
+                        ]
+                    })
+            
+            response = requests.request("POST", "http://mailer-srv:5003/send", headers={
+                'Content-Type': 'application/json',
+            }, data=payload)
+            if response.status_code == 200 and certificate:
+                mail_sent = True
+                current_app.logger.info("Sent mail")
+            else:
+                mail_sent = False
+                current_app.logger.error("Failed to send mail: ")
+                current_app.logger.error(response)
+
         if certificate:
             certificate.status = status
             certificate.s3_path = s3_path
+            certificate.mail_sent = mail_sent
             session.commit()
             # send emails
 

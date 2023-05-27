@@ -1,5 +1,3 @@
-import time
-
 import requests
 from celery import Celery
 from celery.utils.log import get_task_logger
@@ -12,7 +10,6 @@ app = Celery("tasks", broker="amqp://admin:mypass@rabbit:5672", backend="rpc://"
 @app.task()
 def generate_certificates(event):
     logger.info("Got Request - Starting work ")
-    time.sleep(4)
     response = requests.post("http://event-bus-srv:5005/events", json=event)
     logger.info("Work Finished ")
     logger.info(response)

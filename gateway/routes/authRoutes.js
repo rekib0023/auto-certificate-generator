@@ -6,12 +6,11 @@ const constants = require("../constants");
 
 router.post("/signup", async (req, res) => {
   try {
-    const response = await axios
-      .post(`${constants.AUTH_SRV}/api/signup`, req.body)
-      .catch((error) => {
-        const response = error.response;
-        return res.status(response.status).send(response.data);
-      });
+    const response = await axios.post(
+      `${constants.AUTH_SRV}/api/signup`,
+      req.body
+    );
+
     const { access_token, refresh_token } = response.data;
 
     delete response.data.access_token;
@@ -39,18 +38,20 @@ router.post("/signup", async (req, res) => {
     return res.status(201).send(response.data);
   } catch (error) {
     console.log(error);
-    return res.status(500).send({ error: "Internal server error" });
+    if (error.response) {
+      return res.status(error.response.status).send(error.response.data);
+    } else {
+      return res.status(500).send({ error: "Internal server error" });
+    }
   }
 });
 
 router.post("/login", async (req, res) => {
   try {
-    const response = await axios
-      .post(`${constants.AUTH_SRV}/api/login`, req.body)
-      .catch((error) => {
-        const response = error.response;
-        return res.status(response.status).send(response.data);
-      });
+    const response = await axios.post(
+      `${constants.AUTH_SRV}/api/login`,
+      req.body
+    );
     const { access_token, refresh_token } = response.data;
 
     delete response.data.access_token;
@@ -67,7 +68,11 @@ router.post("/login", async (req, res) => {
     return res.status(201).send(response.data);
   } catch (error) {
     console.log(error);
-    return res.status(500).send({ error: "Internal server error" });
+    if (error.response) {
+      return res.status(error.response.status).send(error.response.data);
+    } else {
+      return res.status(500).send({ error: "Internal server error" });
+    }
   }
 });
 
@@ -87,8 +92,7 @@ router.post("/refresh-token", async (req, res) => {
         },
       })
       .catch((error) => {
-        const response = error.response;
-        return res.status(response.status).send(response.data);
+        return res.status(error.response.status).send(error.response.data);
       });
     res.cookie("access_token", response.data.access_token, {
       httpOnly: true,

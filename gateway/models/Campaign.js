@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
+    company_email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,

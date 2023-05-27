@@ -16,7 +16,7 @@ class S3Instance:
             self.kwargs = {
                 "aws_access_key_id": os.environ.get("AWS_ACCESS_KEY_ID"),
                 "aws_secret_access_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
-                "endpoint_url": f"http://{os.environ['LOCALSTACK_ENDPOINT']}:4566",
+                "endpoint_url": os.environ['LOCALSTACK_ENDPOINT'],
             }
 
         self.client = boto3.client("s3", **self.kwargs)

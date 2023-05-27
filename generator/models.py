@@ -10,6 +10,7 @@ class CertificateModel(db.Model):
     name = db.Column(db.String(80), nullable=False)
     certificate_number = db.Column(db.String(80), unique=True, nullable=False)
     status = db.Column(db.String(120), nullable=True, default="Pending")
+    mail_sent = db.Column(db.Boolean, default=False)
     s3_path = db.Column(db.String(256), nullable=True, default="")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     campaign_id = db.Column(db.Integer, nullable=False)
