@@ -29,6 +29,14 @@ services:
       - "5002:5002"
     depends_on:
       - localstack
+
+  mailer-srv:
+    build: './mailer'
+    container_name: mailer-srv
+    env_file:
+      - './mailer/.env'
+    ports:
+      - "5003:5003"
   
   event-bus-srv:
     build: './event-bus'

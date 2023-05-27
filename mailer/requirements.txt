@@ -1,0 +1,6 @@
+python-dotenv
+flask
+gunicorn==20.1.0
+flask-mail
+
+boto3==1.26.133

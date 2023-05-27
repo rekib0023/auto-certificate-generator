@@ -69,7 +69,7 @@ def prepare_certificates(payload):
         html = render_template(template_key, **html_content)
         pdf = convert_html_to_pdf(html)
         in_memory_file = io.BytesIO(pdf)
-        object_name = f'certificates/{campaign_name}/{row.first_name + "_" + row.last_name}_certificate.pdf'
+        object_name = f'certificates/{company_name}/{campaign_name}/{row.first_name + "_" + row.last_name}_certificate.pdf'
         if s3_obj.upload_file(in_memory_file, object_name):
             pdf_data[row.first_name + "_" + row.last_name] = pdf
             status = "Success"
